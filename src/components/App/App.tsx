@@ -10,49 +10,44 @@ import fetchMovies from '../../services/movieService';
 import type { Movie } from '../../types/movie';
 
 import toast, { Toaster } from 'react-hot-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export default function App() {
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [search, setSearch] = useState('');
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
 
-  const handleSearch = async (query: string) => {
-    try {
-      setMovies([]);
-      setSelectedMovie(null);
-      setIsLoading(true);
-      setIsError(false);
+  const {
+    data: movies = [],
+    isSuccess,
+    isLoading,
+    isError,
+  } = useQuery<Movie[]>({
+    queryKey: ['movies', search],
+    queryFn: () => fetchMovies(search),
+    enabled: search.trim().length > 0,
+    retry: 2,
+  });
 
-      const fetchedMovies = await fetchMovies(query);
-
-      if (fetchedMovies.length === 0) {
-        toast.error('No movies found for your request.');
-        return;
-      }
-      setMovies(fetchedMovies);
-    } catch {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (isSuccess && movies.length === 0) {
+      toast.error('No movies found for your request.');
+      return;
     }
-  };
-
-  const handleMovieClick = (movie: Movie) => {
-    setSelectedMovie(movie);
-  };
+  }, [movies, isSuccess]);
 
   return (
     <>
-      <SearchBar onSubmit={handleSearch} />
+      <SearchBar onSubmit={setSearch} />
       <Toaster position="top-right" />
 
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
-      {movies.length > 0 && (
-        <MovieGrid movies={movies} onSelect={handleMovieClick} />
+
+      {isSuccess && movies.length > 0 && (
+        <MovieGrid movies={movies} onSelect={setSelectedMovie} />
       )}
+
       {selectedMovie && (
         <MovieModal
           onClose={() => setSelectedMovie(null)}

@@ -1,5 +1,5 @@
 import styles from '../SearchBar/SearchBar.module.css';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 interface SearchBarProps {
   onSubmit: (query: string) => void;
@@ -16,7 +16,6 @@ export default function SearchBar({ onSubmit }: SearchBarProps) {
   };
   return (
     <header className={styles.header}>
-      <Toaster position="top-right" />
       <div className={styles.container}>
         <a
           className={styles.link}

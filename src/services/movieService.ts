@@ -12,7 +12,7 @@ const api = axios.create({
 });
 
 export interface MoviesResponse {
-  results: Movie[];
+  results?: Movie[];
 }
 
 export default async function fetchMovies(query: string): Promise<Movie[]> {
@@ -21,5 +21,5 @@ export default async function fetchMovies(query: string): Promise<Movie[]> {
       query: query,
     },
   });
-  return response.data.results;
-}
+  return response.data.results || [];
+};
