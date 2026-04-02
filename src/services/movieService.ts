@@ -12,14 +12,19 @@ const api = axios.create({
 });
 
 export interface MoviesResponse {
-  results?: Movie[];
+  results: Movie[];
+  total_pages: number;
 }
 
-export default async function fetchMovies(query: string): Promise<Movie[]> {
+export default async function fetchMovies(
+  query: string,
+  page: number = 1,
+): Promise<MoviesResponse> {
   const response = await api.get<MoviesResponse>('/search/movie', {
     params: {
       query: query,
+      page: page,
     },
   });
-  return response.data.results || [];
-};
+  return response.data;
+}
